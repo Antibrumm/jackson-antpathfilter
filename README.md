@@ -2,7 +2,7 @@
 Jackson AntPath Property Filter
 ===============================
 
-A Jackson Filter matching the path of the current value to serialize against the AntPathMatcher. The inclusion / exclusion works similar to the `ant` file `include / eclude`functionality. Ant / Maven users should mostly be aware of how this works. I plan to add more examples and test cases later.
+A Jackson Filter matching the path of the current value to serialize against the AntPathMatcher. The inclusion / exclusion works similar to the `ant` file `include / exclude` functionality. Ant / Maven users should mostly be aware of how this works. I plan to add more examples and test cases later.
 
 
 Requirements
@@ -45,14 +45,35 @@ Usage
     objectMapper.writeValueAsString(someObject);
 ```
 
-Inclusion:
+= Inclusion:
 
 ```  
    "*", "**", "*.*", "someproperty.someNesterProperty.*",
 ```
 
-Exclusion:
+= Exclusion:
 
 ```
-   "-property";
+   "-property", "-**.someExpensiveMethod";
 ```
+
+= Examples (from the Unit Tests)
+
+    Filter: manager,manager.firstName,manager.lastName,
+    Result: {"manager":{"firstName":"John","lastName":"Doe"}}
+
+    Filter: **,-manager,
+    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+
+    Filter: *,address.*,manager.firstName,
+    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey","manager":{"firstName":"John"}}
+
+    Filter: **,-manager,-**.streetNumber,
+    Result: {"address":{"streetName":"At my place"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+
+    Filter: firstName,
+    Result: {"firstName":"Martin"}
+
+    Filter: **,-manager,
+    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+
