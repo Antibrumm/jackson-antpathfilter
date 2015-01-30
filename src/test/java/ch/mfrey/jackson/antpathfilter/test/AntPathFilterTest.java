@@ -13,12 +13,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleFilterProvider;
 
 public class AntPathFilterTest {
 
-    private void assertAntFilter(final String[] filters, final String outcome) throws JsonProcessingException {
-        User myself = buildMySelf();
-        assertAntFilter(myself, filters, outcome);
-    }
-
-    private void assertAntFilter(Object testObj, final String[] filters, final String outcome)
+    private void assertAntFilter(final Object testObj, final String[] filters, final String outcome)
             throws JsonProcessingException {
         ObjectMapper objectMapper = buildObjectMapper(filters);
         String json = objectMapper.writeValueAsString(testObj);
@@ -32,6 +27,11 @@ public class AntPathFilterTest {
         System.out.println("Result: " + json);
 
         Assert.assertEquals(outcome, json);
+    }
+
+    private void assertAntFilter(final String[] filters, final String outcome) throws JsonProcessingException {
+        User myself = buildMySelf();
+        assertAntFilter(myself, filters, outcome);
     }
 
     private User buildMySelf() {
@@ -52,6 +52,16 @@ public class AntPathFilterTest {
         return myself;
     }
 
+    private ObjectMapper buildObjectMapper(final String[] filters) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
+
+        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("antPathFilter",
+                new AntPathPropertyFilter(filters));
+        objectMapper.setFilters(filterProvider);
+        return objectMapper;
+    }
+
     private User buildRecursive() {
         User myself = new User();
         myself.setFirstName("Martin");
@@ -64,30 +74,6 @@ public class AntPathFilterTest {
 
         myself.setManager(myself);
         return myself;
-    }
-
-    private ObjectMapper buildObjectMapper(final String[] filters) {
-        ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
-
-        FilterProvider filterProvider = new SimpleFilterProvider().addFilter("antPathFilter",
-                new AntPathPropertyFilter(filters));
-        objectMapper.setFilters(filterProvider);
-        return objectMapper;
-    }
-
-    @Test
-    public void testFirstName() throws JsonProcessingException {
-        String[] filters = new String[] { "firstName" };
-        assertAntFilter(filters, "{\"firstName\":\"Martin\"}");
-    }
-
-    @Test
-    public void testInclusion() throws JsonProcessingException {
-        String[] filters = new String[] { "*", "address.*", "manager.firstName" };
-        assertAntFilter(
-                filters,
-                "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"manager\":{\"firstName\":\"John\"}}");
     }
 
     @Test
@@ -107,6 +93,28 @@ public class AntPathFilterTest {
     }
 
     @Test
+    public void testFirstName() throws JsonProcessingException {
+        String[] filters = new String[] { "firstName" };
+        assertAntFilter(filters, "{\"firstName\":\"Martin\"}");
+    }
+
+    @Test
+    public void testFull() throws JsonProcessingException {
+        String[] filters = new String[] { "**" };
+        assertAntFilter(
+                filters,
+                "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"manager\":{\"address\":null,\"email\":\"john.doe@no.where\",\"firstName\":\"John\",\"lastName\":\"Doe\",\"manager\":null}}");
+    }
+
+    @Test
+    public void testInclusion() throws JsonProcessingException {
+        String[] filters = new String[] { "*", "address.*", "manager.firstName" };
+        assertAntFilter(
+                filters,
+                "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"manager\":{\"firstName\":\"John\"}}");
+    }
+
+    @Test
     public void testManagerNames() throws JsonProcessingException {
         String[] filters = new String[] { "manager", "manager.firstName", "manager.lastName" };
         assertAntFilter(filters, "{\"manager\":{\"firstName\":\"John\",\"lastName\":\"Doe\"}}");
@@ -114,7 +122,10 @@ public class AntPathFilterTest {
 
     @Test
     public void testRecursive1Levels() throws JsonProcessingException {
-        String[] filters = new String[] { "**", "-manager"  };
-        assertAntFilter(buildRecursive(), filters, "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\"}");
+        String[] filters = new String[] { "**", "-manager" };
+        assertAntFilter(
+                buildRecursive(),
+                filters,
+                "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\"}");
     }
 }

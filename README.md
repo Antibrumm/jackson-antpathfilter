@@ -34,46 +34,80 @@ Usage
 -----
 
 ```java
-    String[] filter = new String[] {"*", "*.*", "-not.that.path"};
+String[] filter = new String[] {"*", "*.*", "-not.that.path"};
 
-    ObjectMapper objectMapper = new ObjectMapper();
-    objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
+ObjectMapper objectMapper = new ObjectMapper();
+objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
 
-    FilterProvider filterProvider = new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filter));
-    objectMapper.setFilters(filterProvider);
+FilterProvider filterProvider = new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filter));
+objectMapper.setFilters(filterProvider);
 
-    objectMapper.writeValueAsString(someObject);
+objectMapper.writeValueAsString(someObject);
 ```
 
 = Inclusion:
 
 ```  
-   "*", "**", "*.*", "someproperty.someNesterProperty.*",
+"*", "**", "*.*", "someproperty.someNesterProperty.*",
 ```
 
 = Exclusion:
 
 ```
-   "-property", "-**.someExpensiveMethod";
+"-property", "-**.someExpensiveMethod";
 ```
 
-= Examples (from the Unit Tests)
 
-    Filter: manager,manager.firstName,manager.lastName,
-    Result: {"manager":{"firstName":"John","lastName":"Doe"}}
+Examples (from the Unit Tests)
+------------------------------
 
-    Filter: **,-manager,
-    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+Data
+```
+{
+  "address": {
+    "streetName":"At my place",
+    "streetNumber":"1"
+  },
+  "email":"somewhere@no.where",
+  "firstName":"Martin",
+  "lastName":"Frey",
+  "manager":{
+    "address":null,
+    "email":"john.doe@no.where",
+    "firstName":"John",
+    "lastName":"Doe",
+    "manager":null
+  }
+}
+    
+```
 
-    Filter: *,address.*,manager.firstName,
-    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey","manager":{"firstName":"John"}}
+```
+Filter: **,
+Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey","manager":{"address":null,"email":"john.doe@no.where","firstName":"John","lastName":"Doe","manager":null}}
+```
+    
+```
+Filter: firstName,
+Result: {"firstName":"Martin"}
+```
 
-    Filter: **,-manager,-**.streetNumber,
-    Result: {"address":{"streetName":"At my place"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+```
+Filter: **,-manager,
+Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+```
 
-    Filter: firstName,
-    Result: {"firstName":"Martin"}
+```
+Filter: manager,manager.firstName,manager.lastName,
+Result: {"manager":{"firstName":"John","lastName":"Doe"}}
+```
 
-    Filter: **,-manager,
-    Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+```
+Filter: *,address.*,manager.firstName,
+Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey","manager":{"firstName":"John"}}
+```
 
+```
+Filter: **,-manager,-**.streetNumber,
+Result: {"address":{"streetName":"At my place"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
+```

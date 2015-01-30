@@ -1,6 +1,5 @@
 package ch.mfrey.jackson.antpathfilter;
 
-
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,15 +25,15 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
  */
 public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
 
+    /** The matcher. */
+    private static final AntPathMatcher matcher = new AntPathMatcher(".");
     /** The _properties to exclude. */
     protected final Set<String> _propertiesToExclude;
+
     /**
      * Set of property names to include.
      */
     protected final Set<String> _propertiesToInclude;
-
-    /** The matcher. */
-    private static final AntPathMatcher matcher = new AntPathMatcher(".");
 
     /**
      * Instantiates a new ant path property filter.
