@@ -2,10 +2,7 @@
 Jackson AntPath Property Filter
 ===============================
 
-A Jackson Filter matching the path of the 
-
-Some parts of our webpage will not change often during the lifetime of the application or is dependent only on a usersession.
-This dialect will cache the resulting output of the element it is declared on and will replace the element on a cache hit.
+A Jackson Filter matching the path of the current value to serialize against the AntPathMatcher. The inclusion / exclusion works similar to the `ant` file `include / eclude`functionality. Ant / Maven users should mostly be aware of how this works. I plan to add more examples and test cases later.
 
 
 Requirements
@@ -38,17 +35,20 @@ Usage
 
 ```java
     String[] filter = new String[] {"*", "*.*", "-not.that.path"};
+
     ObjectMapper objectMapper = new ObjectMapper();
-    objectMappercopy.addMixIn(Object.class, AntPathFilterMixin.class);
+    objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
+
     FilterProvider filterProvider = new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filter));
-    objectMapper.setFilters(createCustomFilter(properties));
+    objectMapper.setFilters(filterProvider);
+
     objectMapper.writeValueAsString(someObject);
 ```
 
 Inclusion:
 
 ```  
-   "*", "**", "*.*", "someproperty.anotherone",
+   "*", "**", "*.*", "someproperty.someNesterProperty.*",
 ```
 
 Exclusion:
