@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
  * { "id" : "2", "firstName" : "Martin", "lastName" : "Frey", manager : { "id" : "1", "fullName" :
  * "System Administrator"}}
  * 
- * @author Martin Frey (martin.frey@cgi.com)
+ * @author Martin Frey
  */
 public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
 
