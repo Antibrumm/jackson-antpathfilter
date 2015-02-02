@@ -2,7 +2,7 @@
 Jackson AntPath Property Filter
 ===============================
 
-A Jackson Filter matching the path of the current value to serialize against the AntPathMatcher. The inclusion / exclusion works similar to the `ant` file `include / exclude` functionality. Ant / Maven users should mostly be aware of how this works. I plan to add more examples and test cases later.
+A Jackson Filter matching the path of the current value to serialize against the AntPathMatcher. The inclusion / exclusion works similar to the `ant` file `include / exclude` functionality. Ant / Maven users should mostly be aware of how this works.
 
 [![Build Status](https://travis-ci.org/Antibrumm/jackson-antpathfilter.png)](https://travis-ci.org/Antibrumm/jackson-antpathfilter)
 
