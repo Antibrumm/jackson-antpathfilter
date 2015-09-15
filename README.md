@@ -46,6 +46,46 @@ objectMapper.setFilters(filterProvider);
 objectMapper.writeValueAsString(someObject);
 ```
 
+Spring Integration
+------------------
+For those using this together with Spring it is easy to create a helper class to configure the objectMapper only once and avoid boilerplate code in each `Controller`.
+```java
+@Component
+public class Jackson2Helper {
+
+    private final ObjectMapper objectMapper;
+
+    public Jackson2Helper() {
+        super();
+        objectMapper = new ObjectMapper();
+        objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
+    }
+    
+   public String writeFiltered(final Object value, final String... filters) {
+        try {
+            objectMapper.setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(properties)));
+            return objectMapper.writeValueAsString(someObject);
+        } catch (IOException ioe) {
+            throw new HttpMessageNotWritableException("Could not write object filtered.", ioe);
+        }
+    }
+}
+```
+
+```java
+@Controller
+@RequestMapping(value = "/someObject")
+public class SomeController {
+    @Autowired
+    private Jackson2Helper jackson2Helper;
+
+    @RequestMapping
+    @ResponseBody
+    public String getSomeObject() {
+        return jackson2Helper.writeFiltered(someObject, "*", "*.*", "-not.that.path");
+    }
+}
+```
 = Inclusion:
 
 ```  
