@@ -49,6 +49,19 @@ objectMapper.writeValueAsString(someObject);
 Spring Integration
 ------------------
 For those using this together with Spring it is easy to create a helper class to configure the objectMapper only once and avoid boilerplate code in each `Controller`.
+```xml
+<!-- Needed so that Controllers can return a JSON ResponseBody directly as a String result (produced by Jackson2Helper) -->
+<bean class = "org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
+    <property name="messageConverters">
+        <array>
+            <bean class = "org.springframework.http.converter.StringHttpMessageConverter">
+                <property name="supportedMediaTypes" value="application/json; charset=UTF-8" />
+            </bean>
+        </array>
+    </property>
+</bean>
+```
+
 ```java
 @Component
 public class Jackson2Helper {
