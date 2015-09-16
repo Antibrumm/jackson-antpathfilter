@@ -1,5 +1,7 @@
 package ch.mfrey.jackson.antpathfilter.test;
 
+import java.util.List;
+
 public class User {
 
     private Address address;
@@ -11,6 +13,8 @@ public class User {
     private String lastName;
 
     private User manager;
+    
+    private List<User> reports;
 
     public Address getAddress() {
         return address;
@@ -32,6 +36,10 @@ public class User {
         return manager;
     }
 
+    public List<User> getReports() {
+        return reports;
+    }
+
     public void setAddress(final Address address) {
         this.address = address;
     }
@@ -50,5 +58,9 @@ public class User {
 
     public void setManager(final User manager) {
         this.manager = manager;
+    }
+    
+    public void setReports(List<User> reports) {
+        this.reports = reports;
     }
 }
