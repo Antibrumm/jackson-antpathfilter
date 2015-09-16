@@ -115,7 +115,6 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
      */
     protected boolean include(final PropertyWriter writer, final JsonGenerator jgen) {
         String pathToTest = getPathToTest(writer, jgen);
-        System.out.println(pathToTest);
         if (_propertiesToInclude.isEmpty()) {
             for (String pattern : _propertiesToExclude) {
                 if (matcher.match(pattern, pathToTest)) {
