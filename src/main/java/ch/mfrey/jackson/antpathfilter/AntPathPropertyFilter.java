@@ -1,14 +1,16 @@
 package ch.mfrey.jackson.antpathfilter;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * Implementation that allows to set nested properties. The filter will use the parents from the context to identify if
@@ -25,6 +27,11 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
  */
 public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
 
+    /**
+     * Used in the concatenation of the key used in the pattern/match cache
+     */
+    private static final String KEY_CONCATENATOR = "|";
+
     /** The matcher. */
     private static final AntPathMatcher matcher = new AntPathMatcher(".");
     /** The _properties to exclude. */
@@ -35,6 +42,10 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
      */
     protected final Set<String> _propertiesToInclude;
 
+    /**
+     * Cache of patterns to test, and match results
+     */
+    private Map<String, Boolean> matchCache = new HashMap<String, Boolean>();
     /**
      * Instantiates a new ant path property filter.
      * 
@@ -107,40 +118,90 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     /**
      * Include.
      * 
-     * @param writer
-     *            the writer
-     * @param jgen
-     *            the jgen
+     * @param writer the writer
+     * @param jgen the jgen
      * @return true, if successful
      */
     protected boolean include(final PropertyWriter writer, final JsonGenerator jgen) {
         String pathToTest = getPathToTest(writer, jgen);
         if (_propertiesToInclude.isEmpty()) {
+
             for (String pattern : _propertiesToExclude) {
+                String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
+
+                Boolean cacheResult = matchCache.get(cacheChecker);
+
+                if (cacheResult != null) {
+                    if (cacheResult == true) {
+                        return false;
+                    }
+                    return true;
+                }
+
                 if (matcher.match(pattern, pathToTest)) {
+                    matchCache.put(cacheChecker, true);
                     return false;
                 }
+
+                if (matchCache.get(cacheChecker) == null) {
+                    matchCache.put(cacheChecker, false);
+                }
+                return true;
+
             }
             return true;
-        } else {
-            boolean include = false;
-            for (String pattern : _propertiesToInclude) {
-                if (matcher.match(pattern, pathToTest)) {
+        }
+        boolean include = false;
+
+        for (String pattern : _propertiesToInclude) {
+
+            String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
+
+            Boolean cacheResult = matchCache.get(cacheChecker);
+
+            if (cacheResult != null) {
+                if (cacheResult == true) {
                     include = true;
                     break;
                 }
+            } else {
+                if (matcher.match(pattern, pathToTest)) {
+                    matchCache.put(cacheChecker, true);
+                    include = true;
+                    break;
+                }
+                if (matchCache.get(cacheChecker) == null) {
+                    matchCache.put(cacheChecker, false);
+                }
+
             }
-            if (include && !_propertiesToExclude.isEmpty()) {
-                for (String pattern : _propertiesToExclude) {
-                    if (matcher.match(pattern, pathToTest)) {
+        }
+
+        if (include && !_propertiesToExclude.isEmpty()) {
+            for (String pattern : _propertiesToExclude) {
+                String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
+
+                Boolean cacheResult = matchCache.get(cacheChecker);
+
+                if (cacheResult != null) {
+                    if (cacheResult == true) {
                         return false;
                     }
                 }
+                    
+                if (matcher.match(pattern, pathToTest)) {
+                    matchCache.put(cacheChecker, true);
+                    return false;
+                }
+                if (matchCache.get(cacheChecker) == null) {
+                    matchCache.put(cacheChecker, false);
+                }
             }
-            return include;
         }
-    }
 
+        return include;
+
+    }
     /*
      * (non-Javadoc)
      * 
@@ -151,6 +212,7 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     @Override
     public void serializeAsField(final Object pojo, final JsonGenerator jgen, final SerializerProvider provider,
         final PropertyWriter writer) throws Exception {
+
         if (include(writer, jgen)) {
             writer.serializeAsField(pojo, jgen, provider);
         } else if (!jgen.canOmitFields()) { // since 2.3
