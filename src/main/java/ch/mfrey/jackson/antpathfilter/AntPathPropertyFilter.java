@@ -1,5 +1,10 @@
 package ch.mfrey.jackson.antpathfilter;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonStreamContext;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -7,33 +12,24 @@ import com.fasterxml.jackson.databind.ser.BeanPropertyWriter;
 import com.fasterxml.jackson.databind.ser.PropertyWriter;
 import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-
 /**
- * Implementation that allows to set nested properties. The filter will use the parents from the context to identify if
- * a property has to be filtered.
+ * Implementation that allows to set nested properties. The filter will use the
+ * parents from the context to identify if a property has to be filtered.
  * 
  * Example: user -> manager (user)
  * 
  * "id", "firstName", "lastName", "manager.id", "manager.fullName"
  * 
- * { "id" : "2", "firstName" : "Martin", "lastName" : "Frey", manager : { "id" : "1", "fullName" :
- * "System Administrator"}}
+ * { "id" : "2", "firstName" : "Martin", "lastName" : "Frey", manager : { "id" :
+ * "1", "fullName" : "System Administrator"}}
  * 
  * @author Martin Frey
  */
 public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
 
-    /**
-     * Used in the concatenation of the key used in the pattern/match cache
-     */
-    private static final String KEY_CONCATENATOR = "|";
-
     /** The matcher. */
-    private static final AntPathMatcher matcher = new AntPathMatcher(".");
+    private static final AntPathMatcher MATCHER = new AntPathMatcher(".");
+    
     /** The _properties to exclude. */
     protected final Set<String> _propertiesToExclude;
 
@@ -45,7 +41,8 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     /**
      * Cache of patterns to test, and match results
      */
-    private Map<String, Boolean> matchCache = new HashMap<String, Boolean>();
+    private final Map<String, Boolean> matchCache = new HashMap<String, Boolean>();
+
     /**
      * Instantiates a new ant path property filter.
      * 
@@ -96,8 +93,9 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     /*
      * (non-Javadoc)
      * 
-     * @see com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#include(com.fasterxml.jackson.databind.ser.
-     * BeanPropertyWriter)
+     * @see
+     * com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#include(
+     * com.fasterxml.jackson.databind.ser. BeanPropertyWriter)
      */
     @Override
     protected boolean include(final BeanPropertyWriter writer) {
@@ -107,8 +105,9 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     /*
      * (non-Javadoc)
      * 
-     * @see com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#include(com.fasterxml.jackson.databind.ser.
-     * PropertyWriter)
+     * @see
+     * com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#include(
+     * com.fasterxml.jackson.databind.ser. PropertyWriter)
      */
     @Override
     protected boolean include(final PropertyWriter writer) {
@@ -118,100 +117,67 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     /**
      * Include.
      * 
-     * @param writer the writer
-     * @param jgen the jgen
+     * @param writer
+     *            the writer
+     * @param jgen
+     *            the jgen
      * @return true, if successful
      */
     protected boolean include(final PropertyWriter writer, final JsonGenerator jgen) {
         String pathToTest = getPathToTest(writer, jgen);
+        // Check cache first
+        if (matchCache.containsKey(pathToTest)) {
+            return matchCache.get(pathToTest);
+        }
+
+        // Only Excludes.
         if (_propertiesToInclude.isEmpty()) {
-
             for (String pattern : _propertiesToExclude) {
-                String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
-
-                Boolean cacheResult = matchCache.get(cacheChecker);
-
-                if (cacheResult != null) {
-                    if (cacheResult == true) {
-                        return false;
-                    }
-                    return true;
-                }
-
-                if (matcher.match(pattern, pathToTest)) {
-                    matchCache.put(cacheChecker, true);
+                if (MATCHER.match(pattern, pathToTest)) {
+                    matchCache.put(pathToTest, false);
                     return false;
                 }
-
-                if (matchCache.get(cacheChecker) == null) {
-                    matchCache.put(cacheChecker, false);
-                }
-                return true;
-
             }
+            matchCache.put(pathToTest, true);
             return true;
         }
+        
+        // Else do full check
         boolean include = false;
-
+        // Check Includes first
         for (String pattern : _propertiesToInclude) {
-
-            String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
-
-            Boolean cacheResult = matchCache.get(cacheChecker);
-
-            if (cacheResult != null) {
-                if (cacheResult == true) {
-                    include = true;
-                    break;
-                }
-            } else {
-                if (matcher.match(pattern, pathToTest)) {
-                    matchCache.put(cacheChecker, true);
-                    include = true;
-                    break;
-                }
-                if (matchCache.get(cacheChecker) == null) {
-                    matchCache.put(cacheChecker, false);
-                }
-
+            if (MATCHER.match(pattern, pathToTest)) {
+                include = true;
+                break;
             }
         }
 
+        // Might still be excluded
         if (include && !_propertiesToExclude.isEmpty()) {
             for (String pattern : _propertiesToExclude) {
-                String cacheChecker = pattern + KEY_CONCATENATOR + pathToTest;
-
-                Boolean cacheResult = matchCache.get(cacheChecker);
-
-                if (cacheResult != null) {
-                    if (cacheResult == true) {
-                        return false;
-                    }
-                }
-                    
-                if (matcher.match(pattern, pathToTest)) {
-                    matchCache.put(cacheChecker, true);
+                if (MATCHER.match(pattern, pathToTest)) {
+                    matchCache.put(pathToTest, false);
                     return false;
-                }
-                if (matchCache.get(cacheChecker) == null) {
-                    matchCache.put(cacheChecker, false);
                 }
             }
         }
 
+        matchCache.put(pathToTest, false);
         return include;
-
     }
+
     /*
      * (non-Javadoc)
      * 
-     * @see com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#serializeAsField(java.lang.Object,
-     * com.fasterxml.jackson.core.JsonGenerator, com.fasterxml.jackson.databind.SerializerProvider,
+     * @see com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter#
+     * serializeAsField(java.lang.Object,
+     * com.fasterxml.jackson.core.JsonGenerator,
+     * com.fasterxml.jackson.databind.SerializerProvider,
      * com.fasterxml.jackson.databind.ser.PropertyWriter)
      */
     @Override
     public void serializeAsField(final Object pojo, final JsonGenerator jgen, final SerializerProvider provider,
-        final PropertyWriter writer) throws Exception {
+            final PropertyWriter writer) throws Exception {
 
         if (include(writer, jgen)) {
             writer.serializeAsField(pojo, jgen, provider);
