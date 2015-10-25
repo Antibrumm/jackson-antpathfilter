@@ -162,7 +162,7 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
             }
         }
 
-        matchCache.put(pathToTest, false);
+        matchCache.put(pathToTest, include);
         return include;
     }
 
