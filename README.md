@@ -48,13 +48,13 @@ objectMapper.writeValueAsString(someObject);
 
 Spring Integration
 ------------------
-For those using this together with Spring it is easy to create a helper class to configure the objectMapper only once and avoid boilerplate code in each `Controller`.
+For those using this together with Spring it is easy to use the Jackson2Helper class as a Component to configure the objectMapper only once and avoid boilerplate code in each `Controller`.
 ```xml
 <!-- Needed so that Controllers can return a JSON ResponseBody directly as a String result (produced by Jackson2Helper) -->
 <bean class = "org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
     <property name="messageConverters">
         <array>
-            <bean class = "org.springframework.http.converter.StringHttpMessageConverter">
+            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
                 <property name="supportedMediaTypes" value="application/json; charset=UTF-8" />
             </bean>
         </array>
@@ -63,24 +63,12 @@ For those using this together with Spring it is easy to create a helper class to
 ```
 
 ```java
-@Component
-public class Jackson2Helper {
+@Configuration
+public class Jackson2HelperConfig {
 
-    private final ObjectMapper objectMapper;
-
-    public Jackson2Helper() {
-        super();
-        objectMapper = new ObjectMapper();
-        objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
-    }
-    
-   public String writeFiltered(final Object value, final String... filters) {
-        try {
-            objectMapper.setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(properties)));
-            return objectMapper.writeValueAsString(someObject);
-        } catch (IOException ioe) {
-            throw new HttpMessageNotWritableException("Could not write object filtered.", ioe);
-        }
+    @Bean
+    public Jackson2Helper jackson2Helper() {
+    	return new Jackson2Helper();
     }
 }
 ```

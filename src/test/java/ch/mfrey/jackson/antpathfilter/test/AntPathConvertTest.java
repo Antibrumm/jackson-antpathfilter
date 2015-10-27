@@ -9,9 +9,11 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.mfrey.jackson.antpathfilter.Jackson2Helper;
 import ch.mfrey.jackson.antpathfilter.test.Judgement.Courthouse;
 
 public class AntPathConvertTest {
+    private final Jackson2Helper jackson2Helper = new Jackson2Helper();
 
     @Test
     public void testConvert() throws JsonProcessingException {
@@ -38,7 +40,7 @@ public class AntPathConvertTest {
 
         String[] includedFieldNames = { "id", "judgementNo", "judgementDate", "courthouse", "courthouse.name",
                 "@loaded" };
-        ObjectMapper mapper = ObjectMapperBuilder.buildObjectMapper(includedFieldNames);
+        ObjectMapper mapper = jackson2Helper.buildObjectMapper(includedFieldNames);
 
         String result = mapper.writeValueAsString(judgements);
         System.out.println(result);

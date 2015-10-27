@@ -8,11 +8,14 @@ import org.junit.Test;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import ch.mfrey.jackson.antpathfilter.Jackson2Helper;
+
 public class AntPathFilterTest {
+    private final Jackson2Helper jackson2Helper = new Jackson2Helper();
 
     private void assertAntFilter(final Object testObj, final String[] filters, final String outcome)
             throws JsonProcessingException {
-        ObjectMapper objectMapper = ObjectMapperBuilder.buildObjectMapper(filters);
+        ObjectMapper objectMapper = jackson2Helper.buildObjectMapper(filters);
         String json = objectMapper.writeValueAsString(testObj);
 
         System.out.print("Filter: ");
