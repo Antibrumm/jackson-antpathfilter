@@ -1,8 +1,50 @@
 package ch.mfrey.jackson.antpathfilter.test;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class User {
+    public static User buildMySelf() {
+        User myself = new User();
+        myself.setFirstName("Martin");
+        myself.setLastName("Frey");
+        myself.setEmail("somewhere@no.where");
+        Address address = new Address();
+        address.setStreetName("At my place");
+        address.setStreetNumber("1");
+        myself.setAddress(address);
+
+        User manager = new User();
+        manager.setFirstName("John");
+        manager.setLastName("Doe");
+        manager.setEmail("john.doe@no.where");
+        myself.setManager(manager);
+
+        myself.setReports(new ArrayList<User>());
+        for (int i = 0; i < 10; i++) {
+            final User report = new User();
+            report.setFirstName("First " + i);
+            report.setLastName("Doe " + i);
+            report.setEmail("report" + i + "@no.where");
+            myself.getReports().add(report);
+        }
+
+        return myself;
+    }
+
+    public static User buildRecursive() {
+        User myself = new User();
+        myself.setFirstName("Martin");
+        myself.setLastName("Frey");
+        myself.setEmail("somewhere@no.where");
+        Address address = new Address();
+        address.setStreetName("At my place");
+        address.setStreetNumber("1");
+        myself.setAddress(address);
+
+        myself.setManager(myself);
+        return myself;
+    }
 
     private Address address;
 
@@ -13,7 +55,7 @@ public class User {
     private String lastName;
 
     private User manager;
-    
+
     private List<User> reports;
 
     public Address getAddress() {
@@ -59,7 +101,7 @@ public class User {
     public void setManager(final User manager) {
         this.manager = manager;
     }
-    
+
     public void setReports(List<User> reports) {
         this.reports = reports;
     }
