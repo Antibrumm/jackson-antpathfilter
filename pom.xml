@@ -47,7 +47,7 @@
 	</issueManagement>
 
 	<properties>
-		<java-version>1.8</java-version>
+		<java-version>1.5</java-version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<jackson-version>2.5.0</jackson-version>
 	</properties>
