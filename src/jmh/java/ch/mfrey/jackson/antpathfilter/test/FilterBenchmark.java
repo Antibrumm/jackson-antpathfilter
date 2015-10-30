@@ -19,7 +19,9 @@ import org.openjdk.jmh.annotations.State;
 import org.openjdk.jmh.annotations.Threads;
 import org.openjdk.jmh.annotations.Warmup;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectWriter;
 
 import ch.mfrey.jackson.antpathfilter.Jackson2Helper;
 
@@ -29,7 +31,7 @@ import ch.mfrey.jackson.antpathfilter.Jackson2Helper;
 @Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Fork(3)
-@Threads(2)
+@Threads(5)
 public class FilterBenchmark {
 
     private final Jackson2Helper jackson2Helper = new Jackson2Helper();
@@ -37,9 +39,9 @@ public class FilterBenchmark {
 
     private final Map<Integer, ObjectMapper> cache = new ConcurrentHashMap<Integer, ObjectMapper>();
 
-    
     /**
-     * Convenience method to simply write an object to a json representation using the given filters.
+     * Convenience method to simply write an object to a json representation
+     * using the given filters.
      * 
      * @param value
      *            Any object that can be serialized to json
@@ -58,7 +60,7 @@ public class FilterBenchmark {
             throw new RuntimeException("Could not write object filtered.", ioe);
         }
     }
-    
+
     public FilterBenchmark() {
         for (int i = 0; i < 1000; i++) {
             users.add(User.buildMySelf());
@@ -75,7 +77,19 @@ public class FilterBenchmark {
     @Benchmark
     public void measureNotCached() {
         for (int i = 0; i < 100; i++) {
-            jackson2Helper.writeFiltered(users, "*", i % 2 == 0 ? "-manager" : "-reports", i % 3 == 0 ? "-address" : "-reports");
+            jackson2Helper.writeFiltered(users, "*", i % 2 == 0 ? "-manager" : "-reports",
+                    i % 3 == 0 ? "-address" : "-reports");
+        }
+    }
+
+    @Benchmark
+    public void measureWriter() throws JsonProcessingException {
+        for (int i = 0; i < 100; i++) {
+            ObjectWriter writer = jackson2Helper.getObjectMapper()
+                    .writer(jackson2Helper.buildFilterProvider("*",
+                            i % 2 == 0 ? "-manager" : "-reports",
+                            i % 3 == 0 ? "-address" : "-reports"));
+            writer.writeValueAsString(users);
         }
     }
 }

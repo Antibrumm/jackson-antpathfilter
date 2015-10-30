@@ -15,12 +15,14 @@ public class Jackson2Helper {
     public Jackson2Helper() {
         super();
         this.objectMapper = new ObjectMapper();
-        this.objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
+        this.getObjectMapper().addMixIn(Object.class, AntPathFilterMixin.class);
     }
 
     /**
-     * Allows to explicitly override the default ObjectMapper with an own instance to be able to add more functionality.
-     * It is important to know that the given objectMapper needs to contain the {@link AntPathFilterMixin}!
+     * Allows to explicitly override the default ObjectMapper with an own
+     * instance to be able to add more functionality. It is important to know
+     * that the given objectMapper needs to contain the
+     * {@link AntPathFilterMixin}!
      * 
      * @param objectMapper
      */
@@ -30,19 +32,25 @@ public class Jackson2Helper {
     }
 
     /**
-     * Returns a prepared copy of the ObjectMapper with the filters set to the current arguments.
+     * Returns a prepared copy of the ObjectMapper with the filters set to the
+     * current arguments.
      * 
      * @param filters
      * @return The prepared {@link ObjectMapper} ready for filtering
      */
     public ObjectMapper buildObjectMapper(final String... filters) {
-        ObjectMapper copyForFilter = objectMapper.copy();
-        copyForFilter.setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filters)));
+        ObjectMapper copyForFilter = getObjectMapper().copy();
+        copyForFilter.setFilters(buildFilterProvider(filters));
         return copyForFilter;
     }
 
+    public SimpleFilterProvider buildFilterProvider(final String... filters) {
+        return new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filters));
+    }
+
     /**
-     * Convenience method to simply write an object to a json representation using the given filters.
+     * Convenience method to simply write an object to a json representation
+     * using the given filters.
      * 
      * @param value
      *            Any object that can be serialized to json
@@ -56,5 +64,9 @@ public class Jackson2Helper {
         } catch (IOException ioe) {
             throw new RuntimeException("Could not write object filtered.", ioe);
         }
+    }
+
+    public ObjectMapper getObjectMapper() {
+        return objectMapper;
     }
 }
