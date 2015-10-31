@@ -16,7 +16,7 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
  * Implementation that allows to set nested properties. The filter will use the
  * parents from the context to identify if a property has to be filtered.
  * 
- * Example: user -> manager (user)
+ * Example: user -&gt; manager (user)
  * 
  * "id", "firstName", "lastName", "manager.id", "manager.fullName"
  * 

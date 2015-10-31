@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * 
  * Kindly borrowed from Spring to provide this feature to Jackson for property filtering.
  * 
- * @authoer Martin Frey
+ * @author Martin Frey
  * 
  *          PathMatcher implementation for Ant-style path patterns. Examples are provided below.
  * 
@@ -389,14 +389,14 @@ public class AntPathMatcher {
      * <p>
      * For example:
      * <ul>
-     * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -> ''</li>
-     * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-     * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code commit.html}'</li>
-     * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -> '{@code cvs/commit}'</li>
-     * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -> '{@code cvs/commit.html}'</li>
-     * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -> '{@code docs/cvs/commit.html}'</li>
-     * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
-     * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -> '{@code /docs/cvs/commit.html}'</li>
+     * <li>'{@code /docs/cvs/commit.html}' and '{@code /docs/cvs/commit.html} -&gt; ''</li>
+     * <li>'{@code /docs/*}' and '{@code /docs/cvs/commit} -&gt; '{@code cvs/commit}'</li>
+     * <li>'{@code /docs/cvs/*.html}' and '{@code /docs/cvs/commit.html} -&gt; '{@code commit.html}'</li>
+     * <li>'{@code /docs/**}' and '{@code /docs/cvs/commit} -&gt; '{@code cvs/commit}'</li>
+     * <li>'{@code /docs/**\/*.html}' and '{@code /docs/cvs/commit.html} -&gt; '{@code cvs/commit.html}'</li>
+     * <li>'{@code /*.html}' and '{@code /docs/cvs/commit.html} -&gt; '{@code docs/cvs/commit.html}'</li>
+     * <li>'{@code *.html}' and '{@code /docs/cvs/commit.html} -&gt; '{@code /docs/cvs/commit.html}'</li>
+     * <li>'{@code *}' and '{@code /docs/cvs/commit.html} -&gt; '{@code /docs/cvs/commit.html}'</li>
      * </ul>
      * <p>
      * Assumes that {@link #match} returns {@code true} for '{@code pattern}' and '{@code path}', but does
@@ -441,7 +441,7 @@ public class AntPathMatcher {
      * {@code IllegalArgumentException} is thrown.
      * <p>
      * For example:
-     * <table>
+     * <table summary="">
      * <tr>
      * <th>Pattern 1</th>
      * <th>Pattern 2</th>
@@ -530,19 +530,19 @@ public class AntPathMatcher {
 
         boolean pattern1ContainsUriVar = pattern1.indexOf('{') != -1;
         if (!pattern1.equals(pattern2) && !pattern1ContainsUriVar && match(pattern1, pattern2)) {
-            // /* + /hotel -> /hotel ; "/*.*" + "/*.html" -> /*.html
-            // However /user + /user -> /usr/user ; /{foo} + /bar -> /{foo}/bar
+            // /* + /hotel -&gt; /hotel ; "/*.*" + "/*.html" -&gt; /*.html
+            // However /user + /user -&gt; /usr/user ; /{foo} + /bar -&gt; /{foo}/bar
             return pattern2;
         }
 
-        // /hotels/* + /booking -> /hotels/booking
-        // /hotels/* + booking -> /hotels/booking
+        // /hotels/* + /booking -&gt; /hotels/booking
+        // /hotels/* + booking -&gt; /hotels/booking
         if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnWildCard())) {
             return concat(pattern1.substring(0, pattern1.length() - 2), pattern2);
         }
 
-        // /hotels/** + /booking -> /hotels/**/booking
-        // /hotels/** + booking -> /hotels/**/booking
+        // /hotels/** + /booking -&gt; /hotels/**/booking
+        // /hotels/** + booking -&gt; /hotels/**/booking
         if (pattern1.endsWith(this.pathSeparatorPatternCache.getEndsOnDoubleWildCard())) {
             return concat(pattern1, pattern2);
         }

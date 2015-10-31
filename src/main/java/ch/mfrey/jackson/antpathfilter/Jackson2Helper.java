@@ -25,6 +25,7 @@ public class Jackson2Helper {
      * {@link AntPathFilterMixin}!
      * 
      * @param objectMapper
+     *            The ObjectMapper
      */
     public Jackson2Helper(ObjectMapper objectMapper) {
         super();
@@ -36,6 +37,7 @@ public class Jackson2Helper {
      * current arguments.
      * 
      * @param filters
+     *            The filters to be used
      * @return The prepared {@link ObjectMapper} ready for filtering
      */
     public ObjectMapper buildObjectMapper(final String... filters) {
@@ -44,6 +46,13 @@ public class Jackson2Helper {
         return copyForFilter;
     }
 
+    /**
+     * Build the FilterProvider for the given filters
+     * 
+     * @param filters
+     *            The filters to be user
+     * @return The configured FilterProvider
+     */
     public SimpleFilterProvider buildFilterProvider(final String... filters) {
         return new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filters));
     }
@@ -66,6 +75,11 @@ public class Jackson2Helper {
         }
     }
 
+    /**
+     * Get the ObjectMapper
+     * 
+     * @return The ObjectMapper
+     */
     public ObjectMapper getObjectMapper() {
         return objectMapper;
     }
