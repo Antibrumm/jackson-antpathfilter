@@ -32,6 +32,31 @@ public class User {
         return myself;
     }
 
+    public static User buildRecursive(int lvl) {
+        User myself = new User();
+        myself.setFirstName("Martin");
+        myself.setLastName("Frey");
+        myself.setEmail("somewhere@no.where");
+        Address address = new Address();
+        address.setStreetName("At my place");
+        address.setStreetNumber("1");
+        myself.setAddress(address);
+
+        myself.setReports(new ArrayList<User>());
+        for (int i = 0; i < 10; i++) {
+            final User report = new User();
+            report.setFirstName("First " + i);
+            report.setLastName("Doe " + i);
+            report.setEmail("report" + i + "@no.where");
+            myself.getReports().add(report);
+        }
+
+        if (lvl > 0) {
+            myself.setManager(buildRecursive(lvl - 1));
+        }
+        return myself;
+    }
+
     public static User buildRecursive() {
         User myself = new User();
         myself.setFirstName("Martin");
