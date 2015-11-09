@@ -21,7 +21,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import ch.mfrey.jackson.antpathfilter.Jackson2Helper;
 
 @State(Scope.Benchmark)
-@BenchmarkMode(Mode.Throughput)
+@BenchmarkMode(Mode.AverageTime)
 @OutputTimeUnit(TimeUnit.MILLISECONDS)
 @Warmup(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
 @Measurement(iterations = 10, time = 1, timeUnit = TimeUnit.SECONDS)
@@ -43,6 +43,12 @@ public class ComparisonBenchmark {
     public void measureFiltered() {
         jackson2Helper.writeFiltered(users,
                 "*", "**.manager.*", "**.address.streetName", "**.reports.lastName");
+    }
+
+    @Benchmark
+    public void measureSpecificFilters() {
+        jackson2Helper.writeFiltered(users,
+                "firstName", "lastName", "email", "manager.firstName", "manager.lastName");
     }
 
     @Benchmark

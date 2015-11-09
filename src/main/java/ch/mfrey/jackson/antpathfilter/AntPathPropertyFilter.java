@@ -29,7 +29,7 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
 
     /** The matcher. */
     private static final AntPathMatcher MATCHER = new AntPathMatcher(".");
-    
+
     /** The _properties to exclude. */
     protected final Set<String> _propertiesToExclude;
 
@@ -133,7 +133,7 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
         // Only Excludes.
         if (_propertiesToInclude.isEmpty()) {
             for (String pattern : _propertiesToExclude) {
-                if (MATCHER.match(pattern, pathToTest)) {
+                if (matchPath(pathToTest, pattern)) {
                     matchCache.put(pathToTest, false);
                     return false;
                 }
@@ -141,12 +141,12 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
             matchCache.put(pathToTest, true);
             return true;
         }
-        
+
         // Else do full check
         boolean include = false;
         // Check Includes first
         for (String pattern : _propertiesToInclude) {
-            if (MATCHER.match(pattern, pathToTest)) {
+            if (matchPath(pathToTest, pattern)) {
                 include = true;
                 break;
             }
@@ -155,15 +155,31 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
         // Might still be excluded
         if (include && !_propertiesToExclude.isEmpty()) {
             for (String pattern : _propertiesToExclude) {
-                if (MATCHER.match(pattern, pathToTest)) {
-                    matchCache.put(pathToTest, false);
-                    return false;
+                if (matchPath(pathToTest, pattern)) {
+                    include = false;
+                    break;
                 }
             }
         }
 
         matchCache.put(pathToTest, include);
         return include;
+    }
+
+    /**
+     * Only uses AntPathMatcher if the pattern contains wildcards, else use
+     * simple equals
+     * 
+     * @param pathToTest
+     * @param pattern
+     * @return
+     */
+    private boolean matchPath(String pathToTest, String pattern) {
+        if (pattern.contains("*")) {
+            return MATCHER.match(pattern, pathToTest);
+        } else {
+            return pattern.equals(pathToTest);
+        }
     }
 
     /*
