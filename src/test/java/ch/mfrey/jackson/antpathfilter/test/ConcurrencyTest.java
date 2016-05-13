@@ -25,7 +25,7 @@ public class ConcurrencyTest {
         public Object call() throws Exception {
             try {
                 for (int i = 0; i < 30; i++) {
-                    String json = jackson2Helper.writeFiltered(user, "*", i % 2 == 0 ? "-manager" : "-reports", i % 3 == 0 ? "-address" : "-reports");
+                    String json = jackson2Helper.writeFiltered(user, "*", i % 2 == 0 ? "!manager" : "!reports", i % 3 == 0 ? "!address" : "!reports");
                     if (i % 2 == 0 && i % 3 == 0) {
                         Assert.assertEquals("{\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"reports\":[{},{},{},{},{},{},{},{},{},{}]}", json);
                     } else if (i % 2 == 0) {

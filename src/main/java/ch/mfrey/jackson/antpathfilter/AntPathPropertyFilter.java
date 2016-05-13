@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.core.JsonStreamContext;
@@ -26,7 +27,9 @@ import com.fasterxml.jackson.databind.ser.impl.SimpleBeanPropertyFilter;
  * @author Martin Frey
  */
 public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
-
+    
+    private static final Logger log = Logger.getLogger(AntPathPropertyFilter.class.toString());
+    
     /** The matcher. */
     private static final AntPathMatcher MATCHER = new AntPathMatcher(".");
 
@@ -55,6 +58,9 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
         _propertiesToExclude = new HashSet<String>(properties.length);
         for (int i = 0; i < properties.length; i++) {
             if (properties[i].startsWith("-")) {
+                _propertiesToExclude.add(properties[i].substring(1));
+                log.warning("Using '-' for exclusion is now deprecated. Please use '!'");
+            } else if (properties[i].startsWith("!")) {
                 _propertiesToExclude.add(properties[i].substring(1));
             } else {
                 _propertiesToInclude.add(properties[i]);

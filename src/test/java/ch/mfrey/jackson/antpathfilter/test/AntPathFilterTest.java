@@ -33,6 +33,13 @@ public class AntPathFilterTest {
 
     @Test
     public void testExclusion() throws JsonProcessingException {
+        String[] filters = new String[] { "**", "!manager" };
+        assertAntFilter(filters,
+                "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"reports\":[{\"address\":null,\"email\":\"report0@no.where\",\"firstName\":\"First 0\",\"lastName\":\"Doe 0\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report1@no.where\",\"firstName\":\"First 1\",\"lastName\":\"Doe 1\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report2@no.where\",\"firstName\":\"First 2\",\"lastName\":\"Doe 2\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report3@no.where\",\"firstName\":\"First 3\",\"lastName\":\"Doe 3\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report4@no.where\",\"firstName\":\"First 4\",\"lastName\":\"Doe 4\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report5@no.where\",\"firstName\":\"First 5\",\"lastName\":\"Doe 5\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report6@no.where\",\"firstName\":\"First 6\",\"lastName\":\"Doe 6\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report7@no.where\",\"firstName\":\"First 7\",\"lastName\":\"Doe 7\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report8@no.where\",\"firstName\":\"First 8\",\"lastName\":\"Doe 8\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report9@no.where\",\"firstName\":\"First 9\",\"lastName\":\"Doe 9\",\"manager\":null,\"reports\":null}]}");
+    }
+
+    @Test
+    public void testOldExclusionPattern() throws JsonProcessingException {
         String[] filters = new String[] { "**", "-manager" };
         assertAntFilter(filters,
                 "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"reports\":[{\"address\":null,\"email\":\"report0@no.where\",\"firstName\":\"First 0\",\"lastName\":\"Doe 0\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report1@no.where\",\"firstName\":\"First 1\",\"lastName\":\"Doe 1\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report2@no.where\",\"firstName\":\"First 2\",\"lastName\":\"Doe 2\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report3@no.where\",\"firstName\":\"First 3\",\"lastName\":\"Doe 3\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report4@no.where\",\"firstName\":\"First 4\",\"lastName\":\"Doe 4\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report5@no.where\",\"firstName\":\"First 5\",\"lastName\":\"Doe 5\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report6@no.where\",\"firstName\":\"First 6\",\"lastName\":\"Doe 6\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report7@no.where\",\"firstName\":\"First 7\",\"lastName\":\"Doe 7\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report8@no.where\",\"firstName\":\"First 8\",\"lastName\":\"Doe 8\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report9@no.where\",\"firstName\":\"First 9\",\"lastName\":\"Doe 9\",\"manager\":null,\"reports\":null}]}");
@@ -40,7 +47,7 @@ public class AntPathFilterTest {
 
     @Test
     public void testExclusion2() throws JsonProcessingException {
-        String[] filters = new String[] { "**", "-manager", "-**.streetNumber" };
+        String[] filters = new String[] { "**", "!manager", "!**.streetNumber" };
         assertAntFilter(filters,
                 "{\"address\":{\"streetName\":\"At my place\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"reports\":[{\"address\":null,\"email\":\"report0@no.where\",\"firstName\":\"First 0\",\"lastName\":\"Doe 0\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report1@no.where\",\"firstName\":\"First 1\",\"lastName\":\"Doe 1\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report2@no.where\",\"firstName\":\"First 2\",\"lastName\":\"Doe 2\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report3@no.where\",\"firstName\":\"First 3\",\"lastName\":\"Doe 3\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report4@no.where\",\"firstName\":\"First 4\",\"lastName\":\"Doe 4\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report5@no.where\",\"firstName\":\"First 5\",\"lastName\":\"Doe 5\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report6@no.where\",\"firstName\":\"First 6\",\"lastName\":\"Doe 6\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report7@no.where\",\"firstName\":\"First 7\",\"lastName\":\"Doe 7\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report8@no.where\",\"firstName\":\"First 8\",\"lastName\":\"Doe 8\",\"manager\":null,\"reports\":null},{\"address\":null,\"email\":\"report9@no.where\",\"firstName\":\"First 9\",\"lastName\":\"Doe 9\",\"manager\":null,\"reports\":null}]}");
     }
@@ -73,7 +80,7 @@ public class AntPathFilterTest {
 
     @Test
     public void testRecursive1Levels() throws JsonProcessingException {
-        String[] filters = new String[] { "**", "-manager" };
+        String[] filters = new String[] { "**", "!manager" };
         assertAntFilter(User.buildRecursive(), filters,
                 "{\"address\":{\"streetName\":\"At my place\",\"streetNumber\":\"1\"},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"reports\":null}");
     }
