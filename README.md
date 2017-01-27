@@ -210,3 +210,8 @@ Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"some
 Filter: **,-manager,-**.streetNumber,
 Result: {"address":{"streetName":"At my place"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
 ```
+
+```
+Filter: "reports", "reports.firstName"
+Result: {"reports":[{"firstName":"First 0"},{"firstName":"First 1"},{"firstName":"First 2"},{"firstName":"First 3"},{"firstName":"First 4"},{"firstName":"First 5"},{"firstName":"First 6"},{"firstName":"First 7"},{"firstName":"First 8"},{"firstName":"First 9"}]}
+```
