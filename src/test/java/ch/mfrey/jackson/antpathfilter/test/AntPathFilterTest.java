@@ -91,5 +91,17 @@ public class AntPathFilterTest {
         assertAntFilter(User.buildMySelf(), filters,
                 "{\"reports\":[{\"firstName\":\"First 0\"},{\"firstName\":\"First 1\"},{\"firstName\":\"First 2\"},{\"firstName\":\"First 3\"},{\"firstName\":\"First 4\"},{\"firstName\":\"First 5\"},{\"firstName\":\"First 6\"},{\"firstName\":\"First 7\"},{\"firstName\":\"First 8\"},{\"firstName\":\"First 9\"}]}");
     }
+    @Test
+    public void testReports2() throws JsonProcessingException {
+        String[] filters = new String[]{"reports.firstName"};
+        assertAntFilter(User.buildMySelf(), filters,
+                "{\"reports\":[{\"firstName\":\"First 0\"},{\"firstName\":\"First 1\"},{\"firstName\":\"First 2\"},{\"firstName\":\"First 3\"},{\"firstName\":\"First 4\"},{\"firstName\":\"First 5\"},{\"firstName\":\"First 6\"},{\"firstName\":\"First 7\"},{\"firstName\":\"First 8\"},{\"firstName\":\"First 9\"}]}");
+    }
+    @Test
+    public void testAllFirstLevelAndReportFirstName() throws JsonProcessingException {
+        String[] filters = new String[]{"*.firstName"};
+        assertAntFilter(User.buildMySelf(), filters,
+                "{\"address\":{},\"email\":\"somewhere@no.where\",\"firstName\":\"Martin\",\"lastName\":\"Frey\",\"manager\":{\"firstName\":\"John\"},\"reports\":[{\"firstName\":\"First 0\"},{\"firstName\":\"First 1\"},{\"firstName\":\"First 2\"},{\"firstName\":\"First 3\"},{\"firstName\":\"First 4\"},{\"firstName\":\"First 5\"},{\"firstName\":\"First 6\"},{\"firstName\":\"First 7\"},{\"firstName\":\"First 8\"},{\"firstName\":\"First 9\"}]}");
+    }
 
 }
