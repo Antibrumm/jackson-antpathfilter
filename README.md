@@ -55,7 +55,7 @@ objectMapper.writeValueAsString(someObject);
 = Exclusion:
 
 ```
-"-property", "!**.someExpensiveMethod";
+"!property", "!**.someExpensiveMethod";
 ```
 
 Spring Integration
