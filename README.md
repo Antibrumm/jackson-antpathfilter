@@ -35,7 +35,7 @@ Usage
 -----
 
 ```java
-String[] filter = new String[] {"*", "*.*", "-not.that.path"};
+String[] filter = new String[] {"*", "*.*", "!not.that.path"};
 
 ObjectMapper objectMapper = new ObjectMapper();
 objectMapper.addMixIn(Object.class, AntPathFilterMixin.class);
@@ -55,7 +55,7 @@ objectMapper.writeValueAsString(someObject);
 = Exclusion:
 
 ```
-"-property", "-**.someExpensiveMethod";
+"-property", "!**.someExpensiveMethod";
 ```
 
 Spring Integration
@@ -98,7 +98,7 @@ public class SomeController {
     @RequestMapping
     @ResponseBody
     public String getSomeObject() {
-        return jackson2Helper.writeFiltered(someObject, "*", "*.*", "-not.that.path");
+        return jackson2Helper.writeFiltered(someObject, "*", "*.*", "!not.that.path");
     }
 }
 ```
@@ -152,7 +152,7 @@ public class SomeController {
     @RequestMapping
     @ResponseBody
     public MappingJacksonValue getSomeObject() {
-        return new AntPathFilterMappingJacksonValue(someObject, "*", "*.*", "-not.that.path");
+        return new AntPathFilterMappingJacksonValue(someObject, "*", "*.*", "!not.that.path");
     }
 }
 ```
@@ -192,7 +192,7 @@ Result: {"firstName":"Martin"}
 ```
 
 ```
-Filter: **,-manager,
+Filter: **,!manager,
 Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
 ```
 
@@ -207,7 +207,7 @@ Result: {"address":{"streetName":"At my place","streetNumber":"1"},"email":"some
 ```
 
 ```
-Filter: **,-manager,-**.streetNumber,
+Filter: **,-manager,!**.streetNumber,
 Result: {"address":{"streetName":"At my place"},"email":"somewhere@no.where","firstName":"Martin","lastName":"Frey"}
 ```
 
