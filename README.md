@@ -104,20 +104,11 @@ public class DispatcherConfiguration extends WebMvcConfigurerAdapter {
     public HttpMessageConverter antpathJacksonConverter() {
         return new AntPathMappingJackson2HttpMessageConverter(jacksonObjectMapperFactory().getObject());
     }
-
-    @Bean
-    public HttpMessageConverter jacksonConverter() {
-        return new MappingJackson2HttpMessageConverter(jacksonObjectMapperFactory().getObject());
-    }
-
+    
     @Override
-    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.add(...);
-        // Register the Antpath Converter before the default Jackson Converter
-        converters.add(antpathJacksonConverter());
-        converters.add(jacksonConverter());
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(0, antpathJacksonConverter());
     }
-
 }
 ```
 
