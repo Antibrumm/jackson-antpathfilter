@@ -61,84 +61,61 @@ objectMapper.writeValueAsString(someObject);
 Spring Integration
 ------------------
 
-= Before Spring 4.2.2
-
-For those using this together with Spring it is easy to use the Jackson2Helper class as a Component to configure the objectMapper only once and avoid boilerplate code in each `Controller`.
-```xml
-<!-- Needed so that Controllers can return a JSON ResponseBody directly as a String result (produced by Jackson2Helper) -->
-<bean class = "org.springframework.web.servlet.mvc.annotation.AnnotationMethodHandlerAdapter">
-    <property name="messageConverters">
-        <array>
-            <bean class="org.springframework.http.converter.StringHttpMessageConverter">
-                <property name="supportedMediaTypes" value="application/json; charset=UTF-8" />
-            </bean>
-        </array>
-    </property>
-</bean>
-```
-
-```java
-@Configuration
-public class Jackson2HelperConfig {
-
-    @Bean
-    public Jackson2Helper jackson2Helper() {
-    	return new Jackson2Helper();
-    }
-}
-```
-
-```java
-@Controller
-@RequestMapping(value = "/someObject")
-public class SomeController {
-    @Autowired
-    private Jackson2Helper jackson2Helper;
-
-    @RequestMapping
-    @ResponseBody
-    public String getSomeObject() {
-        return jackson2Helper.writeFiltered(someObject, "*", "*.*", "!not.that.path");
-    }
-}
-```
-
 = With Spring 4.2.2+
 
-With the latest addon in Spring 4.2.2, the class `MappingJacksonValue` contains now a function `setFilters`, it is now possible to integrate this filter in a cleaner way. No specific StringConverter is needed anymore, but we need some more classes for now:
 ```java
-@Configuration
-public class WebConfig extends DelegatingWebMvcConfiguration {
-    @Override
-    public void configureMessageConverters(final List<HttpMessageConverter<?>> messageConverters) {
-        // Add a MappingJackson2HttpMessageConverter so that
-        // objectMapper.writeFiltered
-        // is using the objectMapper configured with the needed Mixin
-        ObjectMapper objectMapper = Jackson2ObjectMapperBuilder
-            .json()
-            .mixIn(Object.class, AntPathFilterMixin.class)
-            .build();
-        messageConverters.add(new MappingJackson2HttpMessageConverter(objectMapper));
+public class AntPathMappingJackson2HttpMessageConverter extends MappingJackson2HttpMessageConverter {
 
-        addDefaultHttpMessageConverters(messageConverters);
+    public AntPathMappingJackson2HttpMessageConverter(ObjectMapper originalObjectMapper) {
+        super(originalObjectMapper.copy().addMixIn(Object.class, HibernateAwareAntPathFilterMixin.class));
+    }
+
+    @Override
+    public boolean canWrite(Class<?> clazz, MediaType mediaType) {
+        return AntPathFilterMappingJacksonValue.class.isAssignableFrom(clazz);
+    }
+
+    @JsonFilter("antPathFilter")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    public static class HibernateAwareAntPathFilterMixin {
+    }
+}
+
+public class AntPathFilterMappingJacksonValue<T> extends MappingJacksonValue {
+
+    public AntPathFilterMappingJacksonValue(final T value, final String... filters) {
+        super(value);
+        setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filters)));
     }
 }
 ```
 
 ```java
-/**
- * Just a helper class to simplify usage
- */
-public class AntPathFilterMappingJacksonValue extends MappingJacksonValue {
+@Configuration
+@EnableWebMvc
+public class DispatcherConfiguration extends WebMvcConfigurerAdapter {
 
-    public AntPathFilterMappingJacksonValue(final Object value) {
-        super(value);
-        setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter("**")));
+    @Bean
+    public FactoryBean<ObjectMapper> jacksonObjectMapperFactory() {
+    	// Normal Jackson configuration
+    }
+    
+    @Bean
+    public HttpMessageConverter antpathJacksonConverter() {
+        return new AntPathMappingJackson2HttpMessageConverter(jacksonObjectMapperFactory().getObject());
     }
 
-    public AntPathFilterMappingJacksonValue(final Object value, final String... filters) {
-        super(value);
-        setFilters(new SimpleFilterProvider().addFilter("antPathFilter", new AntPathPropertyFilter(filters)));
+    @Bean
+    public HttpMessageConverter jacksonConverter() {
+        return new MappingJackson2HttpMessageConverter(jacksonObjectMapperFactory().getObject());
+    }
+
+    @Override
+    public void configureMessageConverters(List<HttpMessageConverter<?>> converters) {
+        converters.add(...);
+        // Register the Antpath Converter before the default Jackson Converter
+        converters.add(antpathJacksonConverter());
+        converters.add(jacksonConverter());
     }
 
 }
@@ -151,8 +128,8 @@ public class SomeController {
     
     @RequestMapping
     @ResponseBody
-    public MappingJacksonValue getSomeObject() {
-        return new AntPathFilterMappingJacksonValue(someObject, "*", "*.*", "!not.that.path");
+    public AntPathFilterMappingJacksonValue<SomeClass> getSomeObject() {
+        return new AntPathFilterMappingJacksonValue<>(someObject, "*", "*.*", "!not.that.path");
     }
 }
 ```
