@@ -6,3 +6,4 @@ target/
 .project
 .classpath
 /.svn
+nb-configuration.xml
