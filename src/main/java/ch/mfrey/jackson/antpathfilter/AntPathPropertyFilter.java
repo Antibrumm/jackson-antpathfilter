@@ -152,7 +152,7 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
         boolean include = false;
         // Check Includes first
         for (String pattern : _propertiesToInclude) {
-            if (matchPath(pathToTest, pattern)) {
+            if (permissiveMatchPath(pathToTest, pattern)) {
                 include = true;
                 break;
             }
@@ -173,9 +173,19 @@ public class AntPathPropertyFilter extends SimpleBeanPropertyFilter {
     }
 
     /**
+     * Only uses AntPathMatcher matchStart for adding properties
+     *
+     * @param pathToTest
+     * @param pattern
+     * @return
+     */
+    private boolean permissiveMatchPath(String pathToTest, String pattern) {
+        return MATCHER.matchStart(pattern, pathToTest);
+    }
+    /**
      * Only uses AntPathMatcher if the pattern contains wildcards, else use
      * simple equals
-     * 
+     *
      * @param pathToTest
      * @param pattern
      * @return
